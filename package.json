@@ -1,0 +1,14 @@
+{
+  "name": "starlink-rdc-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "start": "concurrently \"cd server && npm run start\" \"cd client && npm run dev\"",
+    "start:server": "cd server && npm run start",
+    "start:client": "cd client && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

@@ -1,0 +1,83 @@
+name: Cloud Auto Redeploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  trigger-render:
+    name: Trigger Render Deploy Hook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL is not set. Skipping Render trigger."
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+  trigger-vercel:
+    name: Trigger Vercel Deploy Hook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "VERCEL_DEPLOY_HOOK_URL is not set. Skipping Vercel trigger."
+            exit 0
+          fi
+          curl -fsS -X POST "$VERCEL_DEPLOY_HOOK_URL"
+
+  wait-backend:
+    name: Wait Backend Healthy
+    runs-on: ubuntu-latest
+    needs: trigger-render
+    steps:
+      - name: Poll backend health
+        env:
+          BACKEND_HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL }}
+        run: |
+          if [ -z "$BACKEND_HEALTH_URL" ]; then
+            echo "BACKEND_HEALTH_URL is not set. Skipping backend health check."
+            exit 0
+          fi
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_HEALTH_URL" || true)
+            echo "Attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Backend health check did not return 200 in time."
+          exit 1
+
+  wait-frontend:
+    name: Wait Frontend Healthy
+    runs-on: ubuntu-latest
+    needs: trigger-vercel
+    steps:
+      - name: Poll frontend health
+        env:
+          FRONTEND_HEALTH_URL: ${{ secrets.FRONTEND_HEALTH_URL }}
+        run: |
+          if [ -z "$FRONTEND_HEALTH_URL" ]; then
+            echo "FRONTEND_HEALTH_URL is not set. Skipping frontend health check."
+            exit 0
+          fi
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_HEALTH_URL" || true)
+            echo "Attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Frontend health check did not return 200 in time."
+          exit 1

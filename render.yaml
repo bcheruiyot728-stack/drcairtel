@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: drc-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm run start
+    healthCheckPath: /api/offres
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: TELEGRAM_ENABLED
+        value: false

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 170" role="img" aria-label="Starlink">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#071a38"/>
+      <stop offset="100%" stop-color="#173d75"/>
+    </linearGradient>
+  </defs>
+  <rect width="500" height="170" rx="20" fill="url(#g)"/>
+  <path d="M250 34l24 30h-48z" fill="#ffffff"/>
+  <path d="M226 70h48l-24 40z" fill="#e5eeff"/>
+  <text x="250" y="142" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" letter-spacing="7" fill="#ffffff">STARLINK</text>
+</svg>
