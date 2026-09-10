@@ -2,7 +2,7 @@
 
 const configuredApiBase = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
 const API_BASE_URL = configuredApiBase;
-const FALLBACK_API_BASE_URL = 'https://drc-co0e.onrender.com';
+const FALLBACK_API_BASE_URL = 'https://drcairtel.onrender.com';
 const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
 const apiFetch = async (path, options) => {
   const primaryUrl = apiUrl(path);
