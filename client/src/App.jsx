@@ -1,23 +1,13 @@
 ﻿import { useEffect, useRef, useState } from 'react';
 
+const DEFAULT_API_BASE_URL = 'https://citiairtel.onrender.com';
 const configuredApiBase = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
-const API_BASE_URL = configuredApiBase;
-const FALLBACK_API_BASE_URL = 'https://drcairtel.onrender.com';
+const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const API_BASE_URL = configuredApiBase || (isLocalDev ? '' : DEFAULT_API_BASE_URL);
 const apiUrl = (path) => (API_BASE_URL ? `${API_BASE_URL}${path}` : path);
 const apiFetch = async (path, options) => {
-  const primaryUrl = apiUrl(path);
-  try {
-    const response = await fetch(primaryUrl, options);
-    if (API_BASE_URL || !path.startsWith('/api/') || response.status !== 404) {
-      return response;
-    }
-  } catch (err) {
-    if (API_BASE_URL || !path.startsWith('/api/')) {
-      throw err;
-    }
-  }
-
-  return fetch(`${FALLBACK_API_BASE_URL}${path}`, options);
+  const url = apiUrl(path);
+  return fetch(url, options);
 };
 
 const uiIconMap = {

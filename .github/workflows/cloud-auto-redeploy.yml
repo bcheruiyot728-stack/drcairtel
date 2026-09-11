@@ -1,4 +1,4 @@
-name: Cloud Auto Redeploy
+name: Render Auto Redeploy
 
 on:
   push:
@@ -19,20 +19,6 @@ jobs:
             exit 0
           fi
           curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
-
-  trigger-vercel:
-    name: Trigger Vercel Deploy Hook
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Vercel
-        env:
-          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
-        run: |
-          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
-            echo "VERCEL_DEPLOY_HOOK_URL is not set. Skipping Vercel trigger."
-            exit 0
-          fi
-          curl -fsS -X POST "$VERCEL_DEPLOY_HOOK_URL"
 
   wait-backend:
     name: Wait Backend Healthy
@@ -61,7 +47,7 @@ jobs:
   wait-frontend:
     name: Wait Frontend Healthy
     runs-on: ubuntu-latest
-    needs: trigger-vercel
+    needs: trigger-render
     steps:
       - name: Poll frontend health
         env:

@@ -81,43 +81,41 @@ Ouvrir le port HTTP entrant:
 
 Le conteneur `web` sert le frontend et proxy `/api/*` vers le conteneur `api`.
 
-## Production web (Vercel + Render)
+## Production web (Render)
 
 Configuration recommandee:
 
-- Frontend: Vercel (`https://starlinknet.vercel.app`)
-- Backend: Render (`https://drc-co0e.onrender.com`)
+- Frontend: Render static site (nouveau domaine fourni par vous)
+- Backend: Render web service
 
-### Variables Vercel
+### Variables frontend
 
-Dans le projet Vercel, definir:
+Dans le service frontend Render, definissez :
 
-- `VITE_API_BASE_URL=https://drc-co0e.onrender.com`
+- `VITE_API_BASE_URL=https://<votre-backend-render>.onrender.com`
 
-Le frontend supporte aussi un fallback automatique vers cette URL en production.
+Le frontend supporte aussi un appel relatif si la variable n'est pas fournie, mais pour un domaine frontend distinct il est recommande d'utiliser cette variable explicitement.
 
 ### Render
 
-Le fichier `render.yaml` est inclus pour declarer le service backend avec:
+Le fichier `render.yaml` contient maintenant les deux services necessaires :
 
-- `rootDir: server`
-- `startCommand: npm run start`
-- `healthCheckPath: /api/offres`
+- backend Node.js (`server`)
+- frontend static (`client`)
 
 Important: verifier dans Render que les variables d'environnement Telegram sont correctes selon vos besoins.
 
 ### Redeploiement cloud 100% automatique (sans clic dashboard)
 
-Le workflow `.github/workflows/cloud-auto-redeploy.yml` declenche automatiquement les redeploiements Vercel et Render apres chaque push sur `main` via deploy hooks.
+Le workflow `.github/workflows/cloud-auto-redeploy.yml` declenche automatiquement le deploy Render apres chaque push sur `main` via le deploy hook.
 
 Ajouter ces secrets GitHub (`Settings > Secrets and variables > Actions`):
 
 - `RENDER_DEPLOY_HOOK_URL`: URL du deploy hook Render.
-- `VERCEL_DEPLOY_HOOK_URL`: URL du deploy hook Vercel.
-- `BACKEND_HEALTH_URL`: ex `https://drc-co0e.onrender.com/api/offres`
-- `FRONTEND_HEALTH_URL`: ex `https://starlinknet.vercel.app/`
+- `BACKEND_HEALTH_URL`: ex `https://<votre-backend-render>.onrender.com/api/offres`
+- `FRONTEND_HEALTH_URL`: ex `https://<votre-nouveau-domaine-frontend>/`
 
 Resultat:
 
-- Push sur `main` -> trigger Render + Vercel
+- Push sur `main` -> trigger Render
 - Workflow attend ensuite que backend/frontend repondent HTTP `200`
